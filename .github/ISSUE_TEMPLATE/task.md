@@ -73,3 +73,54 @@ docker-compose.yml 만들기
 docker-compose down -> 끈다
 
 docker-compose up -d -> 킨다
+
+--------------------------
+
+#####
+2025.09.30
+LLM 기반 Task를 Celery에 붙여보는걸로 가보기
+
+구조
+FastAPI는 사용자가 질문을 입력하면 -> API호출해서
+Celery에 작업을 큐잉
+
+Celery Worker는 OpenAI API를 호출해서 답변 생성하고
+Redis에 저장
+
+마지막으로 
+Task_id로 상태/결과확인
+
+1. $env:OPENAI_API_KEY = "sk-xxxxx"
+윈도우환경에서 openai 환경변수 등록하기
+- >비주얼코드에 터미널에서 이걸 입력하면됨(임시방법)
+
+이제 docker-compose세팅을 했으므로
+코드가 변경될때마다
+
+docker-compose up -d --build를 입력하면되니다.
+
+------------------
+
+2025 - 10 -01
+
+openai로 llm을 연결할려다가
+openai 과금이슈로 ollama로 바꿨는데,
+까먹고 그 전에 docker-compose.yml코드에 openai 키코드를 넣고 깃푸쉬해버려서
+그냥 레포지토리를 싹 갈아엎었다....
+
+ollama 키
+
+& "C:\Users\82107\AppData\Local\Programs\Ollama\Ollama.exe" --version
+
+ollama 키는법
+
+C:\Users\82107\AppData\Local\Programs\Ollama\Ollama.exe serve
+
+ollama 죽이는법
+
+taskkill /IM "ollama app.exe" /F
+taskkill /IM "ollama.exe" /F
+
+확인
+
+tasklist | findstr ollama
