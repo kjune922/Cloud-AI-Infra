@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+celery
+redis
+psycopg2-binary
+sqlalchemy
+openai
+requests
