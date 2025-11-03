@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String, create_engine # --> column, integer, string은 실제 db 컬럼정의, create_engine() db연결엔진
+from sqlalchemy.ext.declarative import declarative_base # declarative_base --> 모든 모델들이 상속할 "기본 베이스 클래스"생성
+from sqlalchemy.orm import sessionmaker # -- db 세션관리 팩토리
 
 # DB 접속정보 
 DATABASE_URL = "postgresql+psycopg2://kjune922:dlrudalswns2@db:5432/cloud_ai"
 
 # SQLALchemy 엔진 생성
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL) # -> DB와 실제 연결 통로
 
 # 세션 (DB 연결관리)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

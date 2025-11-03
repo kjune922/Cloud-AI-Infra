@@ -1,6 +1,8 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
+from fastapi import Request
+from fastapi import Body
 from celery.result import AsyncResult
-from src.celery_app import celery_app, add, ask_llm, get_task_result
+from src.celery_app import save_webhook_event, add, ask_llm, get_task_result
 from src.db.models import SessionLocal, TaskResult, WebhookEvent
 
 # FastAPI 앱 인스턴스 생성하는거임
@@ -72,7 +74,7 @@ def check_task_result(task_id: str):
 
 from src.db.models import SessionLocal,TaskResult # Task Rsult -> 우리가 SQLAlchemy로 정의한 모델 클래스(->DB테이블 task_reuslts에 매핑됨)
 
-@app.get("/db-results/") # FaskAPI 엔드포인트 정의
+@app.get("/db-results/") # FastAPI 엔드포인트 정의
 def get_db_results(): # 요청이 들어오면 이 함수 실행
   db = SessionLocal() # DB 세션 객체 생성 -> 여기서 db는 실제로 PostgreSQL에 연결된 통로역할, 이걸로 insert, select, update 같은 sql실행 ㅇㅋ
   try: # DB연결을 열었으니 이제 할일을 try에, 닫을땐 finally로 안전하게 사용
@@ -91,10 +93,20 @@ def get_db_results(): # 요청이 들어오면 이 함수 실행
     return response_data
   finally:  # 작업 끝나면 DB닫음
     db.close()
+    
+#--------------------------------웹훅라인
 
+'''
+class WebhookPayload(BaseModel):
+  type : str
+  message : str | None = None
+  data: dict | None = None
+'''  
+  
 @app.post("/webhook")
-async def receive_webhook(request:Request):
-  data = await request.json()
+# async def receive_webhook(request:Request):
+async def receive_webhook(data: dict=Body(...)):
+#  data = await request.json()
   event_type = data.get("type","unknown")  # JSON에 "type"키가 없으면 unknown처리하겠음
   task = save_webhook_event.delay(event_type,data)
   return {

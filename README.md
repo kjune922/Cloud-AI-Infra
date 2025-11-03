@@ -114,3 +114,35 @@ class WebhookEvent(Base):
 이게 왜 필요하냐면 클라이언트가 계속 변화있냐고 물어보면 비효율적이니까
 이벤트가생기면 Webhook이 즉시 서버에 계속알려준다
 그리고 이 이벤트를 우린 Celery에 넘겨서 비동기로 처리가능
+
+### 2025 11 03 다시 시작
+
+docker-compose up -d --build 로 백그라운드로 시작
+
+1. 현재 add-task에 4, 6을 넣고 task-id를 리턴받는건 성공, 그러나 log찍어보면 에러와 함께 10이라는 게 뱉어지긴함
+2. swagger ui에선 task-result칸에 status failure이 뜬다
+
+3. 그래서 에러 로그를 확인하기위해 docker logs celery_worker 라고 쳤음
+
+4. [SQL: INSERT INTO task_results (task_id, status, result) VALUES (%(task_id)s, %(status)s, %(result)s) RETURNING task_results.id]
+[parameters: {'task_id': '43deed11-43c8-42fe-bc78-da8fddb8949d', 'status': '성공입니다', 'result': '10'}]
+(Background on this error at: https://sqlalche.me/e/20/f405) 현재 에러로그임
+
+--> 해석해보자면 sqlalchemy가 실행한 실제 sql은 insert into task_results (task_id, status, result) values~~~ 이건데
+한마디로 celery_worker가 DB의 task_results 테이블에 새 행을 추가할려고했음 여기까진 성공이니 이제 db에 들어가서 확인 ㄱㄱ
+
+확인 명령어 : docker exec -it postgres-db psql -U kjune922 -d cloud_ai -c "\dt"
+
+5. 알고보니 db에 테이블을 실제로 생성한적이 없음
+
+생성 명령어 : docker exec -it fastapi_app python -c "from src.db.models import Base, engine; Base.metadata.create_all(bind=engine)"
+
+6. db를 만들고 확인해보자 다시
+
+7. 이제 다시 add-task나 ask-llm 실행가능해졌음
+
+8. 기존에 web_hook에는 받는기능만있고 내가 기입하는 기능이없어서 import body해서 내가 직접추가했음 -> main.py 참고
+
+9. 그리고 docker exec -it postgres-db psql -U kjune922 -d cloud_ai  이건 내가 postgreSQL에 직접 들어가는 명령어
+
+10. \q 써서 빠져나오면됨
