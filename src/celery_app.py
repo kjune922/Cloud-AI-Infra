@@ -69,25 +69,26 @@ def save_webhook_event(event_type: str, payload: dict):
 
 from src.db.models import TaskResult
 import requests
-OLLAMA_API_URL = "http://127.0.0.1:11434/api/chat"
+OLLAMA_API_URL = "http://ollama:11434/api/generate"
 OLLAMA_MODEL = "llama2" 
 
 
 @celery_app.task
-def ask_llm(prompt: str):
+def ask_llm(prompt: str): # 이 함수를 celery 비동기 테스크로 등록한다는 뜻
   # OpenAI API 호출을 하려했으나 과금이슈로
   # Ollama로 교체
   
-  url = "http://127.0.0.1:11434/api/chat"
+  url = OLLAMA_API_URL
   payload = {
-        "model": "llama2",   # ollama에 설치된 모델명 (예: llama2, gemma:2b, mistral 등)
-        "messages": [{"role": "user", "content": prompt}],
+        "model": OLLAMA_MODEL,   # ollama에 설치된 모델명 (예: llama2, gemma:2b, mistral 등)
+        "prompt": prompt,
         "stream": False
   }
-  resp = requests.post(url, json=payload)
+  resp = requests.post(url, json=payload) # ollama서버에 post요청을 보냄
   resp.raise_for_status()  # 오류 있으면 예외 발생
-  data = resp.json()
-  result_text = data["message"]["content"]
+  data = resp.json() # json형태로 응답 본문 파싱
+  result_text = data.get("response","")
+  
   # DB 저장
   db = SessionLocal()
   try:

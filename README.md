@@ -146,3 +146,6 @@ docker-compose up -d --build 로 백그라운드로 시작
 9. 그리고 docker exec -it postgres-db psql -U kjune922 -d cloud_ai  이건 내가 postgreSQL에 직접 들어가는 명령어
 
 10. \q 써서 빠져나오면됨
+
+#### 
+2025-11-04
